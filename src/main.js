@@ -1,84 +1,104 @@
-import express from 'express'
-import {promises, existsSync} from 'fs';
+import express from "express";
+import {existsSync, promises} from "fs";
+import {body, validationResult} from "express-validator"
 
-const app = express()
-
+const app = express();
+app.use(express.static('../www'));
 app.use(express.json());
+const DATA_FILE = '../shopping-list.json';
 
-const DATA_FILE = 'shopping-list.json';
 
-async function getShoppingList() {
-    const text = await promises.readFile(DATA_FILE, {encoding: 'utf8'})
-    return JSON.parse(text)
+const failOnIssues = () => (req, res, next) => {
+ const validationReport = validationResult(req)
+    if (!validationReport.isEmpty()){
+        res
+            .status(400)
+            .json(validationReport.array())
+} else {
+        next()
+    }
 }
 
-async function saveShoppingList(shoppingList) {
-    await promises.writeFile(DATA_FILE, JSON.stringify(shoppingList), {encoding:'utf-8'})
-}
-/**
- * Return all shopping list items as JSON.
- */
-app.get('/items', async (request, response) => {
-    const shoppingList = await getShoppingList()
-    response.json(shoppingList);
-})
-/**
- * save a new shopping list item
- */
-app.post('/items', async (request, response) =>{
-    const shoppingList = await getShoppingList();
+const idNotEmpty = () => body('id').notEmpty()
+const amountIntMinOne = () => body('amount').isInt({min:1}).toInt()
 
-    const newItem = request.body;
-    console.log(newItem)
-    shoppingList.push(newItem)
-
-    await saveShoppingList(shoppingList)
-
-    response.sendStatus(200)
+app.get('/items', async (req,res) => {
+    const data = await promises.readFile(DATA_FILE, {encoding: 'utf8'});
+    const shoppingList = JSON.parse(data)
+    res.json(shoppingList);
 })
 
-/**
- * Override a shopping list item at a given position.
- */
-app.put('/items/:index', async (request, response) => {
-    const shoppingList = await getShoppingList()
+app.post('/items',
+    idNotEmpty(),
+    amountIntMinOne().notEmpty(),
+    failOnIssues(),
+    async (req, res) => {
 
-    const newItem = request.body;
-    const itemIndex = request.params['index'];
+        const data = await promises.readFile(DATA_FILE, {encoding: 'utf8'});
+        const shoppingList = JSON.parse(data)
+
+        const newItem = req.body;
+        console.log(newItem)
+        shoppingList.push(newItem);
+
+        await promises.writeFile(DATA_FILE, JSON.stringify(shoppingList), {encoding: 'utf8'});
+        res.sendStatus(200);
+
+})
+app.put('/items/:index',
+    idNotEmpty().optional(),
+    amountIntMinOne().optional(),
+    failOnIssues(),
+    async (req, res) => {
+    const data = await promises.readFile(DATA_FILE, {encoding: "utf8"})
+    const shoppingList = JSON.parse(data);
+
+    const newItem = req.body;
+    const itemIndex = req.params['index'];
 
     shoppingList[itemIndex] = newItem;
 
-    await saveShoppingList(shoppingList)
-
-    response.sendStatus(200);
+    await promises.writeFile(DATA_FILE, JSON.stringify(shoppingList), {encoding: 'utf-8'});
+    res.sendStatus(200)
 })
 
-/**
- * Delete a shopping list item from a given position.
- */
-app.delete('/items/:index', async (request, response) => {
-    const shoppingList = await getShoppingList()
+app.patch('/items/:index',
+    idNotEmpty().optional(),
+    amountIntMinOne().optional(),
+    failOnIssues(),
+    async (req, res) => {
+    const data = await promises.readFile(DATA_FILE, {encoding: 'utf-8'});
+    const shoppingList = JSON.parse(data);
+    const index = req.params.index;
 
-    const itemIndex = request.params['index'];
-
-    shoppingList.splice(itemIndex, 1)
-
-    await saveShoppingList(shoppingList)
-
-    response.sendStatus(200);
+    if (shoppingList[index]) {
+        shoppingList[index] = {
+            ...shoppingList[index],
+            ...req.body
+        }
+        await promises.writeFile(DATA_FILE, JSON.stringify(shoppingList), {encoding: "utf8"});
+        res.sendStatus(200);
+    } else {
+        res.sendStatus(404);
+    }
 })
 
-/**
- * Create the DATA_FILE if it does not exist yet.
- */
-if(!existsSync(DATA_FILE)){
-    await promises.writeFile(DATA_FILE, JSON.stringify([]), {encoding:'utf-8'})
+app.delete('/items/:index', async (req, res) =>{
+    const data = await promises.readFile(DATA_FILE, {encoding: 'utf8'});
+    const shoppingList = JSON.parse(data);
+
+    const itemIndex = req.params['index'];
+    shoppingList.splice(itemIndex,1);
+
+    await promises.writeFile(DATA_FILE, JSON.stringify(shoppingList), {encoding: 'utf-8'});
+    res.sendStatus(200)
+})
+
+if (!existsSync(DATA_FILE)) {
+    await promises.writeFile(DATA_FILE, JSON.stringify([]), {encoding: 'utf-8'});
 }
 
-const port = 8000;
-/**
- * Start the server.
- */
-app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
+const port = 3000
+app.listen(port, ()=>{
+    console.log(`Listening on port ${port}`)
 })

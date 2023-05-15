@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Shopping list</title>
+</head>
+<body>
+
+<form action="/items" method="post" id="shopping-form">
+    <label for="id">Product Name: <input id="id" type="text" name="id">
+    </label>
+    <label for="amount">Amount: <input id="amount" type="number" name="amount"></label>
+    <button type="submit">Enter</button>
+</form>
+<script src="script.js"></script>
+<table>
+    <thead>
+        <tr>
+            <th>Product Name</th>
+            <th>Amount</th>
+        </tr>
+    </thead>
+    <tbody id="data-output">
+    </tbody>
+</table>
+
+</body>
+</html>
