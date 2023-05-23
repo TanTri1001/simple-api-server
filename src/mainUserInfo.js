@@ -19,7 +19,7 @@ const failOnIssues = () => (req, res, next) => {
     }
 }
 
-const countries = ['Germany', 'United States', 'United Kingdom', 'Cannada' ]
+const countries = ['Germany', 'United States', 'United Kingdom', 'Canada' ]
 app.get('/users-info', async (req, res) => {
     const data = await promises.readFile(DATA_FILE, {encoding: 'utf8'});
     const usersData = JSON.parse(data);
@@ -29,15 +29,18 @@ app.get('/users-info', async (req, res) => {
 /**
  * validation chain functions
  */
-const checkFirstName = () =>
-    body('firstName')
-        .notEmpty()
-        .withMessage('invalid first name')
+const checkNames = () =>
+    body('firstName').notEmpty().withMessage('invalid first name');
+    body('lastName').notEmpty().withMessage('invalid last name');
 
-const checkLastName = () =>
-    body('lastName')
-        .notEmpty()
-        .withMessage('invalid last name')
+const checkEmail = () => body('email').isEmail().notEmpty();
+const checkAddressAndCityAndState = () =>
+    body('address').notEmpty();
+    body('city').notEmpty();
+    body('state').notEmpty();
+const checkZip = () => body('zip').isInt({min:5});
+const checkCountry = () => body('country').notEmpty().isIn(countries);
+
 
 app.get('/', async (req, res) => {
     const data = await promises.readFile(DATA_FILE, {encoding: 'utf8'});
@@ -47,15 +50,11 @@ app.get('/', async (req, res) => {
 app.post('/users-info',
     // body('firstName').notEmpty(),
     // body('lastName').notEmpty(),
-    checkFirstName(),
-    checkLastName(),
-    body('email').isEmail().notEmpty(),
-    body('age').isInt().toInt(),
-    body('address').notEmpty(),
-    body('city').notEmpty(),
-    body('zip').isInt({ min: 5 }),
-    body('state').notEmpty(),
-    body('country').notEmpty().isIn(countries, ),
+    checkNames(),
+    checkEmail(),
+    checkAddressAndCityAndState(),
+    checkZip(),
+    checkCountry(),
     failOnIssues(),
     async (req, res) => {
     const data = await promises.readFile(DATA_FILE, {encoding: 'utf8'});

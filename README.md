@@ -14,7 +14,7 @@ Start API server:
 
     npm run start
 
-Or execute in the ide with creating a run configuration. Right-click the file `main.js` and select *Run* from
+Or execute in the ide with creating a run configuration. Right-click the file `app.js` and select *Run* from
 context menu.
 
 ## Tests 

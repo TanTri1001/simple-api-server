@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "test": "jest --verbose",
-    "start": "node src/main.js"
+    "start": "node src/app.js"
   },
   "jest": {
     "transform": {
@@ -19,6 +19,7 @@
   "devDependencies": {
     "@babel/preset-env": "^7.20.2",
     "babel-jest": "^29.3.1",
-    "jest": "^29.5.0"
+    "jest": "^29.5.0",
+    "supertest": "^6.3.3"
   }
 }

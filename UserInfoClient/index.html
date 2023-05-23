@@ -6,15 +6,16 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <form action="/users-info" method="post">
+  <form action="/users-info" method="post" id="user-info-form">
     <label for="fname">First Name<input id="fname" name="firstName" ></label>
     <label for="lname">Last Name<input id="lname" type="text" name="lastName"></label>
     <label for="email">Email<input id="email" type="email" name="email"></label>
+    <label for="age">Age<input id="age" type="number" name="age"></label>
     <label for="address">Address: <input id="address" type="text" name="address"></label>
     <label for="city">City<input id="city" type="text" name="city"></label>
     <label for="zip">Zip<input id="zip" type="number" name="zip"></label>
     <label for="state">State<input id="state" type="text" name="state"></label>
-    <label for="country">Country<select id="country">
+    <label for="country">Country<select name="country" id="country">
       <option value="">Please Select</option>
       <option value="Canada">Canada</option>
       <option value="United States">United States</option>
