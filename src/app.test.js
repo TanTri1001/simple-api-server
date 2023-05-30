@@ -1,4 +1,5 @@
-import app, {clearDataFile} from './app.js'
+import app from './app.js'
+import {clearDataFile} from "./data.js";
 import request from 'supertest'
 
 describe('API Server Test', ()=>{
@@ -53,6 +54,7 @@ describe('API Server Test', ()=>{
         expect(response.statusCode).toBe(400);
 
     })
+
 
     test('Test change a whole item', async ()=> {
         const item1 = {id: 'Flour', amount: 1}
@@ -118,6 +120,8 @@ describe('API Server Test', ()=>{
             .send(changedAmount)
         expect(response.statusCode).toBe(404);
     })
+
+
 
     // more test cases
     // 1. patch
