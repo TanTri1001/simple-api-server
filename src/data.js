@@ -1,6 +1,6 @@
 import {existsSync, promises} from "fs";
 
-const DATA_FILE = '../shopping-list.json';
+const DATA_FILE = 'shopping-list.json';
 
 const createDataFileIfNotExists = () => async (request, response, next) => {
     if (!existsSync(DATA_FILE)) {

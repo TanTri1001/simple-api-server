@@ -1,20 +1,42 @@
 import express from 'express'
-import itemsRouter from "./routers/items.router.js";
 import swaggerUi from 'swagger-ui-express';
 import swaggerJsdoc from 'swagger-jsdoc';
-import {createDataFileIfNotExists} from "./data.js";
 import basicAuth from 'express-basic-auth';
+import bcrypt from "bcrypt";
+
+import itemsRouter from "./routers/items.router.js";
+import {createDataFileIfNotExists} from "./data.js";
+
+const USERS = {
+    'Tanya': '$2b$10$JV0IR.ZazLYggSlDMNFAYe4.h7XH9f7yJQIr8R0ykjNjPV5t/pZH6'
+}
+
 
 const app = express();
 app.use(express.static('../www'));
 app.use(express.urlencoded())
-app.use(express.json());
+app.use(express.json()); 
 app.use(createDataFileIfNotExists());
-app.use('/', itemsRouter)
+
+
+
+async function myAuthorizer(username, password, callback) {
+    console.log("username: ", username);
+
+    if (Object.keys(USERS).includes(username)){
+        const passwordMatches = await bcrypt.compare(password, USERS[username]);
+        callback(null, passwordMatches)
+    } else {
+        callback(null, false)
+    }
+}
 
 app.use(basicAuth({
-   users: { 'david': '123' }
+    authorizer: myAuthorizer,
+    authorizeAsync: true,
 }))
+
+app.use('/', itemsRouter)
 
 const openAPIOptions = {
     failOnErrors: true, // Whether or not to throw when parsing errors. Defaults to false.
@@ -31,7 +53,7 @@ const openAPIOptions = {
 const openapiSpecification = swaggerJsdoc(openAPIOptions);
 
 app.use(
-    "/api-docs",
+    '/api-docs',
     swaggerUi.serve,
     swaggerUi.setup(openapiSpecification)
 );

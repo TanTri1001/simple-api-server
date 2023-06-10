@@ -48,6 +48,7 @@ const amountIntMinOne = () => body('amount').isInt({min:1}).toInt()
  *              description: Nothing found.
  */
 itemsRouter.get('/items', async (req,res) => {
+    console.log("getting items");
     const shoppingList = await readItems()
     res.json(shoppingList);
 })
@@ -58,7 +59,6 @@ itemsRouter.post('/items',
     amountIntMinOne().notEmpty(),
     failOnIssues,
     async (req, res) => {
-
         const shoppingList = await readItems()
 
         const newItem = req.body;
